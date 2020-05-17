@@ -1,5 +1,6 @@
 ml/data
 ml/out
 ml/test_patch.npz
+ny_1m_2013/
 __pycache__/
 ./*/__pycache__/
