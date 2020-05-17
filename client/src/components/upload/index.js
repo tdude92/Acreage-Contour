@@ -102,7 +102,7 @@ function Upload(props) {
   const uploadFileToServer = () => {
     toggleUploading(true);
     var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Content-Type", "image/jpeg");
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
