@@ -12,10 +12,8 @@ module.exports = {
     const app = express();
     //post requests
     app.use(bodyParser()); // to use bodyParser (for text/number data transfer between clientg and server)
-    app.set("view engine", "hbs"); // setting hbs as the view engine
     app.use(express.static(__dirname + "/public")); // making ./public as the static directory
     app.set("views", __dirname + "/views"); // making ./views as the views directory
-    app.use(logger("dev")); // Creating a logger (using morgan)
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     //client get requests
