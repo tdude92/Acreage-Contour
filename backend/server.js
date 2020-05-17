@@ -3,9 +3,8 @@
 /* =================================================== */
 
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
-const multer = require('multer');
-const upload = multer({ dest: './uploads/' });
 const hbs = require('hbs');
 const logger = require('morgan');
 const {spawn} = require('child_process');
@@ -19,6 +18,7 @@ const port =  process.env.PORT || 8080;
 /* ==================================================== */
 
 const app =  express();
+app.use(fileUpload());
 app.use(bodyParser());  // to use bodyParser (for text/number data transfer between clientg and server)
 app.set('view engine', 'hbs');  // setting hbs as the view engine
 app.use(express.static(__dirname + '/public'));  // making ./public as the static directory
@@ -39,22 +39,24 @@ app.get('/', (req, res) => {
 
 // POST /upload for file upload
 /* ===== Make sure that file name matches the name attribute in your html ===== */
-app.post('/upload', upload.single('myFile'), (req, res) => {
-    if (req.file) {
-        console.log('Uploading file...');
-        var filename = req.file.filename;
-        var uploadStatus = 'File Uploaded Successfully';
-    } else {
-        console.log('No File Uploaded');
-        var filename = 'FILE NOT UPLOADED';
-        var uploadStatus = 'File Upload Failed';
+app.post('/upload', function(req, res) {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
     }
-    
-    /* ===== Add the function to save filename to database ===== */
-    
-    res.render('index.hbs', { status: uploadStatus, filename: `Name Of File: ${filename}` });
-});
+  
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    //let sampleFile = req.files.sampleFile;
+    let  file = req.files.sampleFile;
 
+
+    // Use the mv() method to place the file somewhere on your server
+    sampleFile.mv('/upload/test.jpg', function(err) {
+      if (err)
+        return res.status(500).send(err);
+  
+      res.send('File uploaded!');
+    });
+  });
 
 
 
@@ -68,6 +70,4 @@ app.listen(port, () => {
     console.log(`App is live on port ${port}`);
 });
 
-
-//Testing below
 
