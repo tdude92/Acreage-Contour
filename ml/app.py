@@ -17,11 +17,8 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location = "cpu"))
 image = cv2.imread("../backend/uploads/" + file_name)
 image = cv2.resize(image, (256, 256))
 
-image = cv2.resize(image, (256, 256))
-
-image = cv2.resize(image, (256, 256))
-
 image = torch.Tensor(2*(image/255) - 1).permute(2, 0, 1)
+
 image = model.generate(image)
 
 cv2.imwrite("../backend/outputs/" + file_name)
