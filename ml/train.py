@@ -15,7 +15,7 @@ CLIP_VALUE = 1
 ON_CUDA  = torch.cuda.is_available()
 
 N_EPOCHS = 500
-BATCH_SIZE = 1
+BATCH_SIZE = 8
 LEARN_RATE = 0.001
 
 if ON_CUDA:
@@ -35,9 +35,9 @@ for file in range(n_files - n_files%BATCH_SIZE):
     labels_loader.append(np.load("data/train/land_cover_labels/" + str(file) + ".npy"))
 
 # Group data into batches.
-data_loader = torch.Tensor(np.stack(data_loader)).view(-1, BATCH_SIZE, 3, 256, 256).to(DEVICE)
-labels_loader = torch.Tensor(np.stack(labels_loader)).type(torch.LongTensor).view(-1, BATCH_SIZE, 256, 256).to(DEVICE)
-
+data_loader = torch.Tensor(np.stack(data_loader)).view(-1, BATCH_SIZE, 3, 256, 256)
+labels_loader = torch.Tensor(np.stack(labels_loader)).type(torch.LongTensor).view(-1, BATCH_SIZE, 256, 256)
+# print(torch.cuda.memory_allocated())
 # Initialize model.
 model = UNet()
 try:
@@ -59,6 +59,7 @@ for epoch in range(N_EPOCHS):
     for step in range(len(data_loader)):
         optimizer.zero_grad()
         images = data_loader[step]
+
         labels = labels_loader[step]
         if ON_CUDA:
             images = images.cuda()
@@ -74,7 +75,6 @@ for epoch in range(N_EPOCHS):
         optimizer.step()
 
         print("\rEpoch " + str(epoch) + "    Step " + str(step + 1) + "/" + str(len(data_loader)) + "    loss: " + str(round(avg_loss/(step+1), 4)), end = "" )
-
     print("\nEpoch " + str(epoch) + " Loss: " + str(avg_loss / len(data_loader)))
     print()
     torch.save(model.state_dict(), "model/" + MODEL_ID + ".pth")
@@ -82,7 +82,7 @@ for epoch in range(N_EPOCHS):
     # Generate random sample.
     i = random.randint(0, len(data_loader) - 1)
     j = random.randint(0, BATCH_SIZE - 1)
-    sample = data_loader[i][j]
+    sample = data_loader[i][j].cuda()
 
     ground_truth = np.zeros((256, 256, 3))
     lc_labels = labels_loader[i][j]
