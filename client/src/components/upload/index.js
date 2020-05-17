@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import "./Upload.scss";
+import PropTypes from "prop-types";
 import {
   Paper,
   Container,
@@ -11,6 +13,7 @@ import {
   Box,
 } from "@material-ui/core";
 import { Image } from "@material-ui/icons";
+import Loading from "pages/loading";
 
 function Upload(props) {
   const [dragging, toggleDragging] = useState(false);
@@ -37,7 +40,7 @@ function Upload(props) {
     };
   }, []);
 
-  const serverURL = "https://test.kevinboxugao.repl.run/input";
+  const serverURL = "http://localhost:3000/upload";
   //handle drag and drop visuals
   const dropRef = useRef();
   const handleDrag = (e) => {
@@ -105,6 +108,7 @@ function Upload(props) {
       headers: myHeaders,
       body: uploadImage,
     };
+
     fetch(serverURL, requestOptions)
       .then((response) => response.json())
       .then((data) => {
@@ -121,7 +125,11 @@ function Upload(props) {
       });
   };
 
-  return (
+  return uploading ? (
+    <div className="load-container">
+      <Loading />
+    </div>
+  ) : (
     <Paper
       style={{
         boxSizing: "content-box",
@@ -210,5 +218,9 @@ function Upload(props) {
     </Paper>
   );
 }
+Upload.PropTypes = {
+  setInput: PropTypes.func,
+  setOutput: PropTypes.func,
+};
 
 export default Upload;

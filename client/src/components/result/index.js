@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {
   Paper,
   Container,
@@ -41,7 +42,7 @@ function Result(props) {
             />
             <CardMedia>
               <img
-                src={example}
+                src={props.input}
                 style={{ minWidth: 512, width: "100%", height: "auto" }}
               />
             </CardMedia>
@@ -51,8 +52,8 @@ function Result(props) {
                 padding: "8px",
                 display: "inline-block",
               }}
-              href={example}
-              download="output"
+              href={props.input}
+              download="input"
             >
               Download
             </a>
@@ -68,7 +69,7 @@ function Result(props) {
             />
             <CardMedia>
               <img
-                src={example}
+                src={props.output}
                 style={{ minWidth: 512, width: "100%", height: "auto" }}
               />
               <a
@@ -77,7 +78,7 @@ function Result(props) {
                   padding: "8px",
                   display: "inline-block",
                 }}
-                href={example}
+                href={props.output}
                 download="output"
               >
                 Download
@@ -92,5 +93,10 @@ function Result(props) {
     </Paper>
   );
 }
+Result.PropTypes = {
+  input: PropTypes.object,
+  output: PropTypes.object,
+  callback: PropTypes.func,
+};
 
 export default Result;

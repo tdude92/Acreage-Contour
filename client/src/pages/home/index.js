@@ -7,10 +7,15 @@ function Home() {
   const [inputImage, setInput] = useState(null);
   const [outputImage, setOutput] = useState(null);
 
+  const clearData = () => {
+    setInput(null);
+    setOutput(null);
+  };
+
   return (
     <Container>
       {inputImage && outputImage ? (
-        <Result />
+        <Result input={inputImage} output={outputImage} callback={clearDate} />
       ) : (
         <Upload
           setInput={(input) => setInput(input)}
