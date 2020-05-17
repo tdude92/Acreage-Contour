@@ -1,6 +1,18 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+
+# A table that maps model outputs for Land Cover ids to RGB colours.
+LC2RGB = [
+    np.array([71, 107, 161]),   # Open Water
+    np.array([181, 201, 143]),  # Tree Canopy / Forest
+    np.array([28, 99, 48]),     # Low Vegetation / Field
+    np.array([179, 173, 163]),  # Barren Land (Rock/Sand/Clay)
+    np.array([237, 0, 0]),      # Impervious (Other)
+    np.array([171, 0, 0]),      # Impervious (Road)
+    np.array([0, 255, 0])       # No Data
+]
 
 class UNet(nn.Module):
     def conv_block(self, in_channels, out_channels, kernel_size = 3):
@@ -48,8 +60,8 @@ class UNet(nn.Module):
         self.conv1_up2 = self.conv_block(128, 64)
 
         self.output_block = nn.Sequential(
-            nn.Conv2d(64, 21, kernel_size = 1, stride = 1),
-            nn.LogSoftmax(dim = 0)
+            nn.Conv2d(64, 7, kernel_size = 1, stride = 1),
+            nn.LogSoftmax(dim = 1)
         )
 
     
@@ -75,23 +87,41 @@ class UNet(nn.Module):
         # Expansion
         x = self.conv3_up1(x)
         x = self.upsample(x)
-        x = x + conv3_down_out
+        x = torch.cat([x.squeeze(), conv3_down_out.squeeze()])
+        x = x.view(1, *x.size())
         x = self.conv3_up2(x)
         # Tensor Dim: (256, 64, 64)
 
         x = self.conv2_up1(x)
         x = self.upsample(x)
-        x = x + conv2_down_out
+        x = torch.cat([x.squeeze(), conv2_down_out.squeeze()])
+        x = x.view(1, *x.size())
         x = self.conv2_up2(x)
         # Tensor Dim: (128, 128, 128)
 
         x = self.conv1_up1(x)
         x = self.upsample(x)
-        x = x + conv1_down_out
+        x = torch.cat([x.squeeze(), conv1_down_out.squeeze()])
+        x = x.view(1, *x.size())
         x = self.conv1_up2(x)
         # Tensor Dim: (64, 256, 256)
 
         x = self.output_block(x)
-        # Tensor Dim: (21, 256, 256)
+        # Tensor Dim: (7, 256, 256)
 
         return x
+    
+
+    def generate(self, image):
+        output = np.zeros((256, 256, 3))
+
+        image = image.view(1, 3, 256, 256)
+        image = torch.exp(self.forward(image))
+        _, image = torch.topk(image, 1, dim = 1)
+        image.squeeze_()
+
+        for i in range(len(image)):
+            for j in range(len(image)):
+                output[i][j] = LC2RGB[image[i][j]]
+        
+        return output
