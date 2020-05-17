@@ -1,1 +1,4 @@
 ml/data
+ml/test_patch.npz
+__pycache__/
+./*/__pycache__/
