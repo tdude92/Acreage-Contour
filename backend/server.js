@@ -8,6 +8,8 @@ const multer = require('multer');
 const upload = multer({ dest: './uploads/' });
 const hbs = require('hbs');
 const logger = require('morgan');
+const {spawn} = require('child_process');
+const fs = require("fs");
 
 // Define port for app to listen on
 const port =  process.env.PORT || 8080;
@@ -53,6 +55,9 @@ app.post('/upload', upload.single('myFile'), (req, res) => {
     res.render('index.hbs', { status: uploadStatus, filename: `Name Of File: ${filename}` });
 });
 
+
+
+
 // GET /temp to render temp.hbs, for dev purposes
 app.get('/temp', (req, res) => {
     res.render('temp.hbs');
@@ -62,3 +67,7 @@ app.get('/temp', (req, res) => {
 app.listen(port, () => {
     console.log(`App is live on port ${port}`);
 });
+
+
+//Testing below
+
