@@ -37,4 +37,19 @@ def upload_file():
 
             cv2.imwrite("../backend/outputs/" + "in_" + file_name, inpt)
             cv2.imwrite("../backend/outputs/" + "out_" + file_name, image)
+            
+            return flask.jsonify(filename = file_name)
+    return "<h1>no</h1>"
 
+@app.route("/grab_out", methods = ["GET"])
+def grab_output():
+    file_name = req.filename
+    return send_from_directory("../backend/outputs/", "out_" + filename)
+
+@app.route("/grab_in", methods = ["GET"])
+def grab_output():
+    file_name = req.filename
+    return send_from_directory("../backend/outputs/", "in_" + filename)
+
+
+app.run(host = "0.0.0.0", port = 8080)
