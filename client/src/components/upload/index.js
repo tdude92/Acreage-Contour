@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { Image } from "@material-ui/icons";
 
-function Upload() {
+function Upload(props) {
   const [dragging, toggleDragging] = useState(false);
   const [fileName, addFileName] = useState(null);
   const [uploadImage, addUploadImage] = useState(null);
@@ -37,7 +37,7 @@ function Upload() {
     };
   }, []);
 
-  const serverURL = "";
+  const serverURL = "https://test.kevinboxugao.repl.run/input";
   //handle drag and drop visuals
   const dropRef = useRef();
   const handleDrag = (e) => {
@@ -96,7 +96,30 @@ function Upload() {
     addFileName(event.target.value.split(/(\\|\/)/g).pop());
   };
 
-  const uploadFileToServer = (event) => {};
+  const uploadFileToServer = () => {
+    toggleUploading(true);
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: uploadImage,
+    };
+    fetch(serverURL, requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        props.setInput(data.input);
+        props.setOutput(data.output);
+        clearData();
+        toggleUploading(false);
+      })
+      .catch((error) => {
+        console.log("error", error);
+        clearData();
+        toggleUploading(false);
+      });
+  };
 
   return (
     <Paper
@@ -106,7 +129,6 @@ function Upload() {
       }}
       ref={dropRef}
       elevation={4}
-      onClick={() => console.log("yes")}
     >
       <Container>
         <Grid
@@ -177,7 +199,7 @@ function Upload() {
                 style={{ margin: 16 }}
                 variant="contained"
                 color="secondary"
-                onClick="uploadFileToServer"
+                onClick={uploadFileToServer}
               >
                 Upload Image
               </Button>
