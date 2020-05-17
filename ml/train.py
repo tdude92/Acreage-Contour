@@ -10,11 +10,12 @@ from model import UNet, LC2RGB
 os.makedirs("out", exist_ok = True)
 
 # Constants
-MODEL_ID = "0"
+MODEL_ID = "1"
+CLIP_VALUE = 1
 ON_CUDA  = torch.cuda.is_available()
 
 N_EPOCHS = 500
-BATCH_SIZE = 32
+BATCH_SIZE = 1
 LEARN_RATE = 0.001
 
 if ON_CUDA:
@@ -54,7 +55,9 @@ optimizer = torch.optim.Adam(model.parameters(), lr = LEARN_RATE)
 
 for epoch in range(N_EPOCHS):
     avg_loss = 0
+
     for step in range(len(data_loader)):
+        optimizer.zero_grad()
         images = data_loader[step]
         labels = labels_loader[step]
         if ON_CUDA:
@@ -67,9 +70,11 @@ for epoch in range(N_EPOCHS):
         avg_loss += train_loss.item()
 
         train_loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), CLIP_VALUE)
         optimizer.step()
 
-        print("\rEpoch " + str(epoch) + "    Step " + str(step + 1) + "/" + str(len(data_loader)), end = "")
+        print("\rEpoch " + str(epoch) + "    Step " + str(step + 1) + "/" + str(len(data_loader)) + "    loss: " + str(round(avg_loss/(step+1), 4)), end = "" )
+
     print("\nEpoch " + str(epoch) + " Loss: " + str(avg_loss / len(data_loader)))
     print()
     torch.save(model.state_dict(), "model/" + MODEL_ID + ".pth")
@@ -87,7 +92,7 @@ for epoch in range(N_EPOCHS):
 
     output = model.generate(sample)
 
-    sample = cv2.cvtColor(sample.cpu().numpy().transpose(1, 2, 0), cv2.COLOR_RGB2BGR)
+    sample = 255 * (cv2.cvtColor(sample.cpu().numpy().transpose(1, 2, 0), cv2.COLOR_RGB2BGR) + 1) /2
     output = cv2.cvtColor(output.astype("float32"), cv2.COLOR_RGB2BGR)
     ground_truth = cv2.cvtColor(ground_truth.astype("float32"), cv2.COLOR_RGB2BGR)
 
