@@ -93,9 +93,9 @@ function Result(props) {
     </Paper>
   );
 }
-Result.PropTypes = {
-  input: PropTypes.object,
-  output: PropTypes.object,
+Result.propTypes = {
+  input: PropTypes.any,
+  output: PropTypes.any,
   callback: PropTypes.func,
 };
 

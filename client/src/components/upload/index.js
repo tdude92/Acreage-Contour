@@ -10,15 +10,18 @@ import {
   Icon,
   Card,
   CardMedia,
+  Fade,
   Box,
 } from "@material-ui/core";
 import { Image } from "@material-ui/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import Loading from "pages/loading";
 
 function Upload(props) {
   const [dragging, toggleDragging] = useState(false);
   const [fileName, addFileName] = useState(null);
   const [uploadImage, addUploadImage] = useState(null);
+  const [uploadFile, addUploadFile] = useState(null);
   const [uploading, toggleUploading] = useState(false);
 
   const [error, setError] = useState(false);
@@ -26,21 +29,23 @@ function Upload(props) {
   var dragCounter = 0;
 
   useEffect(() => {
-    const div = dropRef.current;
-    div.addEventListener("dragenter", handleDragIn);
-    div.addEventListener("dragleave", handleDragOut);
-    div.addEventListener("dragover", handleDrag);
-    div.addEventListener("drop", handleDrop);
-    return () => {
-      // unsubscribe event
-      div.removeEventListener("dragenter", handleDragIn);
-      div.removeEventListener("dragleave", handleDragOut);
-      div.removeEventListener("dragover", handleDrag);
-      div.removeEventListener("drop", handleDrop);
-    };
-  }, []);
+    try {
+      const div = dropRef.current;
+      div.addEventListener("dragenter", handleDragIn);
+      div.addEventListener("dragleave", handleDragOut);
+      div.addEventListener("dragover", handleDrag);
+      div.addEventListener("drop", handleDrop);
+      return () => {
+        // unsubscribe event
+        div.removeEventListener("dragenter", handleDragIn);
+        div.removeEventListener("dragleave", handleDragOut);
+        div.removeEventListener("dragover", handleDrag);
+        div.removeEventListener("drop", handleDrop);
+      };
+    } catch (err) {}
+  }, [uploading]);
 
-  const serverURL = "http://localhost:3000/upload";
+  const serverURL = "http://localhost:3000";
   //handle drag and drop visuals
   const dropRef = useRef();
   const handleDrag = (e) => {
@@ -85,6 +90,7 @@ function Upload(props) {
   const clearData = () => {
     addFileName(null);
     addUploadImage(null);
+    addUploadFile(null);
     setError(null);
   };
 
@@ -95,17 +101,20 @@ function Upload(props) {
   const onFileAdded = (event) => {
     event.preventDefault();
     const file = event.target.files[0];
+    addUploadFile(file);
     addUploadImage(URL.createObjectURL(file));
     addFileName(event.target.value.split(/(\\|\/)/g).pop());
   };
 
   const uploadFileToServer = () => {
     toggleUploading(true);
+    console.log(uploadFile);
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "image/jpeg");
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
+      mode: "cors",
       body: uploadImage,
     };
 
@@ -126,99 +135,116 @@ function Upload(props) {
   };
 
   return uploading ? (
-    <div className="load-container">
-      <Loading />
-    </div>
+    <AnimatePresence>
+      <motion.div
+        className="load-container"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <Loading />
+      </motion.div>
+    </AnimatePresence>
   ) : (
-    <Paper
-      style={{
-        boxSizing: "content-box",
-        border: dragging ? "4px solid #DD2C00" : "4px solid #FFFFFF",
-      }}
-      ref={dropRef}
-      elevation={4}
-    >
-      <Container>
-        <Grid
-          style={{ padding: 16 }}
-          container
-          alignContent="center"
-          alignItems="center"
-          justify="center"
-          direction="column"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <Paper
+          style={{
+            boxSizing: "content-box",
+            border: dragging ? "4px solid #DD2C00" : "4px solid #FFFFFF",
+          }}
+          ref={dropRef}
+          elevation={4}
         >
-          {uploadImage == null ? (
-            <React.Fragment>
-              <Image style={{ fontSize: "12em" }} />
-              <Typography
-                style={{ marginBottom: "0.2em", fontSize: "1.5rem" }}
-                align="center"
-              >
-                Drag and drop your image files to upload
-              </Typography>
-              <Typography
-                style={{ marginBottom: "0.2em" }}
-                align="center"
-                color="textSecondary"
-              >
-                Put your jpeg image of the landscape to get an accurate detailed
-                segmented land cover map
-              </Typography>
-              <Button
-                onClick={openFileDialog}
-                style={{ margin: 16 }}
-                variant="contained"
-                color="secondary"
-              >
-                Choose Jpeg Image
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={onFileAdded}
-                accept="image/jpeg"
-                style={{ display: "none" }}
-              />
-              {error ? (
-                <Typography
-                  style={{ marginBottom: "0.2em" }}
-                  align="center"
-                  color="error"
-                >
-                  File must be in jpeg format
-                </Typography>
-              ) : null}
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <Typography style={{ marginBottom: "0.2em", fontSize: "2rem" }}>
-                Preview Image
-              </Typography>
-              <Card style={{ maxWidth: "90%" }}>
-                <CardMedia>
-                  <img
-                    src={uploadImage}
-                    style={{ width: "100%", height: "auto" }}
+          <Container>
+            <Grid
+              style={{ padding: 16 }}
+              container
+              alignContent="center"
+              alignItems="center"
+              justify="center"
+              direction="column"
+            >
+              {uploadImage == null ? (
+                <React.Fragment>
+                  <Image style={{ fontSize: "12em" }} />
+                  <Typography
+                    style={{ marginBottom: "0.2em", fontSize: "1.5rem" }}
+                    align="center"
+                  >
+                    Drag and drop your image files to upload
+                  </Typography>
+                  <Typography
+                    style={{ marginBottom: "0.2em" }}
+                    align="center"
+                    color="textSecondary"
+                  >
+                    Put your jpeg image of the landscape to get an accurate
+                    detailed segmented land cover map
+                  </Typography>
+                  <Button
+                    onClick={openFileDialog}
+                    style={{ margin: 16 }}
+                    variant="contained"
+                    color="secondary"
+                  >
+                    Choose Jpeg Image
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={onFileAdded}
+                    accept="image/jpeg"
+                    style={{ display: "none" }}
                   />
-                  <Button onClick={clearData}>Remove Image</Button>
-                </CardMedia>
-              </Card>
-              <Button
-                style={{ margin: 16 }}
-                variant="contained"
-                color="secondary"
-                onClick={uploadFileToServer}
-              >
-                Upload Image
-              </Button>
-            </React.Fragment>
-          )}
-        </Grid>
-      </Container>
-    </Paper>
+                  {error ? (
+                    <Typography
+                      style={{ marginBottom: "0.2em" }}
+                      align="center"
+                      color="error"
+                    >
+                      File must be in jpeg format
+                    </Typography>
+                  ) : null}
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <Typography
+                    style={{ marginBottom: "0.2em", fontSize: "2rem" }}
+                  >
+                    Preview Image
+                  </Typography>
+                  <Card style={{ maxWidth: "90%" }}>
+                    <CardMedia>
+                      <img
+                        src={uploadImage}
+                        style={{ width: "100%", height: "auto" }}
+                      />
+                      <Button onClick={clearData}>Remove Image</Button>
+                    </CardMedia>
+                  </Card>
+                  <Button
+                    style={{ margin: 16 }}
+                    variant="contained"
+                    color="secondary"
+                    onClick={uploadFileToServer}
+                  >
+                    Upload Image
+                  </Button>
+                </React.Fragment>
+              )}
+            </Grid>
+          </Container>
+        </Paper>
+      </motion.div>
+    </AnimatePresence>
   );
 }
-Upload.PropTypes = {
+Upload.propTypes = {
   setInput: PropTypes.func,
   setOutput: PropTypes.func,
 };

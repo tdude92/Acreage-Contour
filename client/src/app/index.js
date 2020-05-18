@@ -13,13 +13,13 @@ import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 const Home = React.lazy(() => {
   return Promise.all([
     import("pages/home"),
-    new Promise((resolve) => setTimeout(resolve, 0)),
+    new Promise((resolve) => setTimeout(resolve, 1600)),
   ]).then(([moduleExports]) => moduleExports);
 });
 const PageNotFound = React.lazy(() => {
   return Promise.all([
     import("pages/pagenotfound"),
-    new Promise((resolve) => setTimeout(resolve, 0)),
+    new Promise((resolve) => setTimeout(resolve, 1600)),
   ]).then(([moduleExports]) => moduleExports);
 });
 import Nav from "components/nav";
