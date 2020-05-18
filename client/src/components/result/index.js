@@ -45,18 +45,18 @@ function Result(props) {
                 src={props.input}
                 style={{ minWidth: 512, width: "100%", height: "auto" }}
               />
+              <a
+                style={{
+                  color: "black",
+                  padding: "8px",
+                  display: "inline-block",
+                }}
+                href={props.input}
+                download="input"
+              >
+                Download
+              </a>
             </CardMedia>
-            <a
-              style={{
-                color: "black",
-                padding: "8px",
-                display: "inline-block",
-              }}
-              href={props.input}
-              download="input"
-            >
-              Download
-            </a>
           </Card>
           <ArrowRightAltIcon
             style={{ fontSize: "4rem", transform: "rotate(90deg)", margin: 8 }}
@@ -85,7 +85,12 @@ function Result(props) {
               </a>
             </CardMedia>
           </Card>
-          <Button style={{ margin: 16 }} variant="contained" color="secondary">
+          <Button
+            onClick={props.callback}
+            style={{ margin: 16 }}
+            variant="contained"
+            color="secondary"
+          >
             Choose Another Image
           </Button>
         </Grid>

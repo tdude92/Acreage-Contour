@@ -45,7 +45,7 @@ function Upload(props) {
     } catch (err) {}
   }, [uploading]);
 
-  const serverURL = "http://localhost:3000";
+  const serverURL = "http://localhost:5000/";
   //handle drag and drop visuals
   const dropRef = useRef();
   const handleDrag = (e) => {
@@ -77,6 +77,7 @@ function Upload(props) {
       const file = e.dataTransfer.files[0];
       if (acceptedImageTypes.includes(file["type"])) {
         addUploadImage(URL.createObjectURL(file));
+        addUploadFile(file);
         addFileName(file.name.split(/(\\|\/)/g).pop());
         e.dataTransfer.clearData();
         dragCounter = 0;
@@ -108,30 +109,37 @@ function Upload(props) {
 
   const uploadFileToServer = () => {
     toggleUploading(true);
-    console.log(uploadFile);
     var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "image/jpeg");
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      mode: "cors",
-      body: uploadImage,
-    };
+    myHeaders.append("Content-Type", "application/json");
+    var reader = new FileReader();
+    reader.readAsDataURL(uploadFile);
+    reader.onloadend = function () {
+      var base64data = reader.result;
+      var requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        mode: "cors",
+        body: JSON.stringify({ data: base64data }),
+      };
 
-    fetch(serverURL, requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        props.setInput(data.input);
-        props.setOutput(data.output);
-        clearData();
-        toggleUploading(false);
-      })
-      .catch((error) => {
-        console.log("error", error);
-        clearData();
-        toggleUploading(false);
-      });
+      fetch(serverURL, requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+
+          props.setInput(`data:image/jpeg;base64,${data.input}`);
+          props.setOutput(`data:image/jpeg;base64,${data.output}`);
+        })
+        .then(() => {
+          clearData();
+          toggleUploading(false);
+        })
+        .catch((error) => {
+          console.log("error", error);
+          clearData();
+          toggleUploading(false);
+        });
+    };
   };
 
   return uploading ? (

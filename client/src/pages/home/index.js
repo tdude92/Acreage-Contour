@@ -15,7 +15,7 @@ function Home() {
   return (
     <Container>
       {inputImage && outputImage ? (
-        <Result input={inputImage} output={outputImage} callback={clearDate} />
+        <Result input={inputImage} output={outputImage} callback={clearData} />
       ) : (
         <Upload
           setInput={(input) => setInput(input)}
