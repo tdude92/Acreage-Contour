@@ -1,0 +1,8 @@
+ml/data
+ml/out
+ml/test_patch.npz
+ml/model/dummy.pth
+ml/model/1.pth
+ny_1m_2013/
+__pycache__/
+./*/__pycache__/
