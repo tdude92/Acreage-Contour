@@ -4,3 +4,5 @@ A web application that uses machine learning to automate drawing accurate land c
 
 ### Devpost
 https://devpost.com/software/acreagecontour
+
+![](./screenshots/result.png)
